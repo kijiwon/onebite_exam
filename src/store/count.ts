@@ -4,41 +4,48 @@ import {
   subscribeWithSelector,
   persist,
   createJSONStorage,
+  devtools,
 } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
 export const UseCountStore = create(
-  persist(
-    subscribeWithSelector(
-      // immer
-      // 속성에 직접 접근(불변성 관리) -> 업데이트 코드 간결
-      immer(
-        // combine 사용하는 이유?
-        // state 타입 자동 추론(첫 번째 인수를 기준으로)
-        combine({ count: 0 }, (set) => ({
-          actions: {
-            increase: () => {
-              set((state) => {
-                state.count += 1;
-              });
+  devtools(
+    persist(
+      subscribeWithSelector(
+        // immer
+        // 속성에 직접 접근(불변성 관리) -> 업데이트 코드 간결
+        immer(
+          // combine 사용하는 이유?
+          // state 타입 자동 추론(첫 번째 인수를 기준으로)
+          combine({ count: 0 }, (set) => ({
+            actions: {
+              increase: () => {
+                set((state) => {
+                  state.count += 1;
+                });
+              },
+              decrease: () => {
+                set((state) => {
+                  state.count -= 1;
+                });
+              },
             },
-            decrease: () => {
-              set((state) => {
-                state.count -= 1;
-              });
-            },
-          },
-        })),
+          })),
+        ),
       ),
+      {
+        name: "countStore", // 저장될 이름
+        // store의 어떤 값을 보관할 지 지정
+        partialize: (store) => ({
+          count: store.count,
+        }),
+        // session storage에 저장
+        storage: createJSONStorage(() => sessionStorage),
+      },
     ),
     {
-      name: "countStore", // 저장될 이름
-      // store의 어떤 값을 보관할 지 지정
-      partialize: (store) => ({
-        count: store.count,
-      }),
-      // session storage에 저장
-      storage: createJSONStorage(() => sessionStorage),
+      // countStore 실시간 디버깅
+      name: "countStore",
     },
   ),
 );
