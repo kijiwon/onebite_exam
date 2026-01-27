@@ -1,9 +1,13 @@
 import { create } from "zustand";
-import { combine, subscribeWithSelector, persist } from "zustand/middleware";
+import {
+  combine,
+  subscribeWithSelector,
+  persist,
+  createJSONStorage,
+} from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
 export const UseCountStore = create(
-  // localstorage에 저장
   persist(
     subscribeWithSelector(
       // immer
@@ -33,6 +37,8 @@ export const UseCountStore = create(
       partialize: (store) => ({
         count: store.count,
       }),
+      // session storage에 저장
+      storage: createJSONStorage(() => sessionStorage),
     },
   ),
 );
